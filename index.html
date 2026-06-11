@@ -923,6 +923,156 @@
             text-overflow: ellipsis;
             max-width: 70%;
         }
+        /* ==========================================================================
+   MOBILE & TABLET RESPONSIVE REFACTOR 
+   ========================================================================== */
+
+/* Tablets (iPad / Small Screens) */
+@media screen and (max-width: 1024px) {
+    body {
+        padding: 1rem;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    header h1 {
+        font-size: 1.75rem;
+    }
+
+    .workspace-container {
+        flex-direction: column;
+        height: auto;
+        min-height: calc(100vh - 120px);
+    }
+
+    .scripture-panel, 
+    .workspace-panel {
+        width: 100%;
+    }
+
+    .scripture-panel {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        height: 50vh; /* Keeps a split view look on tablets */
+    }
+
+    .tab-content {
+        padding: 1.5rem;
+        height: auto;
+    }
+    
+    .journal-layout {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .journal-history-pane {
+        border-left: none;
+        border-top: 1px solid var(--border);
+        padding-left: 0;
+        padding-top: 1.5rem;
+        max-height: 350px;
+    }
+}
+
+/* Mobile Devices (iPhones / Android Devices) */
+@media screen and (max-width: 600px) {
+    body {
+        padding: 0.5rem;
+    }
+
+    header {
+        margin-bottom: 1rem;
+    }
+
+    header h1 {
+        font-size: 1.5rem;
+    }
+
+    header p {
+        font-size: 0.85rem;
+    }
+
+    .workspace-container {
+        border-radius: 12px;
+    }
+
+    .panel-header {
+        padding: 0.75rem;
+        gap: 0.5rem;
+        flex-wrap: wrap; /* Wraps drop-downs neatly if screen is narrow */
+    }
+
+    .selector {
+        flex: 1 1 calc(50% - 0.5rem); /* Grid layout for dropdowns */
+        font-size: 0.85rem;
+        padding: 0.4rem 0.6rem;
+    }
+
+    .scripture-content {
+        padding: 1.25rem;
+        font-size: 1.05rem;
+        height: 45vh; /* Gives the text pane proper touch scroll space */
+    }
+
+    .tabs-nav {
+        padding: 0 0.5rem;
+        overflow-x: auto; /* Enable horizontal swiping for app tabs if needed */
+        white-space: nowrap;
+    }
+
+    .tab-btn {
+        padding: 1rem 0.75rem;
+        font-size: 0.85rem;
+        flex: 1;
+        text-align: center;
+    }
+
+    .tab-content {
+        padding: 1.25rem 1rem;
+    }
+
+    h2 {
+        font-size: 1.35rem;
+        margin-bottom: 0.8rem;
+    }
+
+    /* Custom Creator & Grid Fixes */
+    .custom-color-creator {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.6rem;
+    }
+
+    .custom-label-input {
+        width: 100%;
+    }
+
+    .color-key-grid {
+        grid-template-columns: 1fr; /* Stack keys vertically */
+        gap: 0.75rem;
+    }
+
+    /* Chat layout container fixes for tiny mobile viewports */
+    .chat-layout {
+        min-height: 400px;
+    }
+
+    .chat-bubble {
+        max-width: 90%;
+        font-size: 0.9rem;
+        padding: 0.7rem 0.9rem;
+    }
+
+    .suggestion-pane {
+        gap: 0.4rem;
+    }
+
+    .suggestion-chip {
+        padding: 0.35rem 0.7rem;
+        font-size: 0.75rem;
+    }
+}
     </style>
 </head>
 
