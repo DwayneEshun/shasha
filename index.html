@@ -1,0 +1,2064 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Quiet Place</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500&family=Plus+Jakarta+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-color: #f6a1dc;
+            --card-bg: #fff1fd;
+            --text-main: #2c2a29;
+            --text-muted: #736f6c;
+            --accent: #9aa899;
+            /* Calm Sage */
+            --border: #dad2d8;
+            --shadow: rgba(142, 137, 133, 0.05);
+            
+            /* AI Companion Colors */
+            --bubble-user: #f3ebe6;
+            --bubble-ai: #fccef4;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-image: url("shasha.jpg");
+            background-size:cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            padding: 1.5rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        header h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 2rem;
+            font-weight: 400;
+            letter-spacing: 2px;
+            margin-bottom: 0.2rem;
+        }
+
+        header p {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        /* Split Screen Container */
+        .workspace-container {
+            width: 100%;
+            max-width: 1200px;
+            height: calc(100vh - 140px);
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 10px 40px var(--shadow);
+            border: 1px solid var(--border);
+            display: flex;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* LEFT SIDE: Scripture Panel */
+        .scripture-panel {
+            width: 45%;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            background: #fdfdfc;
+        }
+
+        .panel-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            background: #faf8f5;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .selector {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: white;
+            font-size: 0.9rem;
+            color: var(--text-main);
+            outline: none;
+            cursor: pointer;
+        }
+
+        .scripture-content {
+            padding: 2rem;
+            overflow-y: auto;
+            flex-grow: 1;
+            line-height: 1.8;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.15rem;
+            position: relative;
+        }
+
+        .verse-num {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--accent);
+            vertical-align: super;
+            margin-right: 0.3rem;
+        }
+
+        /* RIGHT SIDE: Workspace Tabs */
+        .workspace-panel {
+            width: 55%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tabs-nav {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            background: #faf8f5;
+            padding: 0 1rem;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 1.2rem 1.2rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-main);
+        }
+
+        .tab-btn.active {
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--accent);
+        }
+
+        .tab-content {
+            padding: 2rem;
+            flex-grow: 1;
+            display: none;
+            overflow-y: auto;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem;
+            font-weight: 400;
+            margin-bottom: 1.2rem;
+        }
+
+        /* Loading Spinner & Error Styling */
+        .loader-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 2rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        .spinner {
+            width: 42px;
+            height: 42px;
+            border: 3px solid var(--border);
+            border-top: 3px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1.2rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 1.5rem;
+            text-align: center;
+        }
+
+        .error-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: #b35959;
+        }
+
+        .error-msg {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            max-width: 320px;
+            line-height: 1.5;
+        }
+
+        .retry-btn {
+            padding: 0.6rem 1.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-main);
+            border: 1px solid var(--accent);
+            background: transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .retry-btn:hover {
+            background: var(--accent);
+            color: white;
+        }
+
+        .verse-paragraph {
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            border-radius: 4px;
+            padding: 0.2rem 0.4rem;
+            margin: -0.2rem -0.4rem;
+        }
+
+        .verse-paragraph:hover {
+            background-color: #faf8f5;
+        }
+
+        /* Journal Layout */
+        .journal-layout {
+            display: flex;
+            gap: 1.5rem;
+            height: 100%;
+            min-height: 400px;
+        }
+
+        .journal-editor-pane {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .journal-history-pane {
+            flex: 1.2;
+            border-left: 1px solid var(--border);
+            padding-left: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-height: 100%;
+            overflow: hidden;
+        }
+
+        .journal-history-pane h3 {
+            font-family: 'Cinzel', serif;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--text-main);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .journal-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        #journalScriptureRef {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            color: var(--text-main);
+            font-size: 1.1rem;
+        }
+
+        #journalBody {
+            flex-grow: 1;
+            min-height: 250px;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            outline: none;
+            resize: none;
+            font-size: 1rem;
+            line-height: 1.6;
+            color: var(--text-main);
+            background: #faf8f5;
+            font-family: inherit;
+        }
+
+        #journalBody:focus {
+            border-color: var(--accent);
+            background: white;
+        }
+
+        .journal-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 0.55rem 1.2rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        .action-btn.primary {
+            background: var(--accent);
+            color: white;
+            border: 1px solid var(--accent);
+        }
+
+        .action-btn.primary:hover { opacity: 0.9; }
+
+        .action-btn.secondary {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+
+        .action-btn.secondary:hover {
+            color: var(--text-main);
+            border-color: var(--accent);
+        }
+
+        .save-status {
+            font-size: 0.8rem;
+            color: var(--accent);
+            font-style: italic;
+            margin-left: auto;
+        }
+
+        .journal-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            overflow-y: auto;
+            flex-grow: 1;
+            padding-right: 0.2rem;
+        }
+
+        .journal-item {
+            padding: 0.8rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #faf8f5;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            position: relative;
+        }
+
+        .journal-item:hover {
+            border-color: var(--accent);
+            background: white;
+        }
+
+        .journal-item.active {
+            border-color: var(--accent);
+            background: #f7f9f7;
+            box-shadow: inset 3px 0 0 var(--accent);
+        }
+
+        .journal-item-title {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            padding-right: 1.5rem;
+        }
+
+        .journal-item-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .journal-item-snippet {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .journal-delete-btn {
+            position: absolute;
+            top: 0.8rem;
+            right: 0.8rem;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            line-height: 1;
+            cursor: pointer;
+            opacity: 0.5;
+            transition: all 0.2s;
+        }
+
+        .journal-delete-btn:hover {
+            color: #b35959;
+            opacity: 1;
+            transform: scale(1.2);
+        }
+
+        /* AI Companion Layout */
+        .chat-layout {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-height: 450px;
+        }
+
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 1rem;
+        }
+
+        .chat-status-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-indicator.offline { background-color: #b35959; }
+        .status-indicator.connected { background-color: #618264; }
+
+        .chat-context-tag {
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .settings-toggle-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            transition: transform 0.2s;
+        }
+
+        .settings-toggle-btn:hover {
+            transform: rotate(45deg);
+            color: var(--text-main);
+        }
+
+        .settings-pane {
+            background: #faf8f5;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: none;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .settings-pane label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .api-input-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .api-input-group input {
+            flex-grow: 1;
+            padding: 0.5rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            outline: none;
+            font-size: 0.9rem;
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            padding-right: 0.5rem;
+            margin-bottom: 1rem;
+            min-height: 200px;
+        }
+
+        .chat-msg-row {
+            display: flex;
+            width: 100%;
+        }
+
+        .chat-msg-row.user { justify-content: flex-end; }
+        .chat-msg-row.ai { justify-content: flex-start; }
+
+        .chat-bubble {
+            max-width: 80%;
+            padding: 0.8rem 1.1rem;
+            border-radius: 14px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        .chat-msg-row.user .chat-bubble {
+            background-color: var(--bubble-user);
+            border-bottom-right-radius: 2px;
+            color: var(--text-main);
+        }
+
+        .chat-msg-row.ai .chat-bubble {
+            background-color: var(--bubble-ai);
+            border-bottom-left-radius: 2px;
+            color: var(--text-main);
+        }
+
+        .chat-pin-btn {
+            display: block;
+            margin-top: 0.5rem;
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--text-main);
+            padding: 0.25rem 0.6rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: fit-content;
+        }
+
+        .chat-pin-btn:hover {
+            background: var(--accent);
+            color: white;
+        }
+
+        .typing-indicator {
+            display: inline-flex;
+            gap: 4px;
+            padding: 0.2rem 0.5rem;
+        }
+
+        .typing-indicator span {
+            width: 6px;
+            height: 6px;
+            background-color: var(--text-muted);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1.0); }
+        }
+
+        .suggestion-pane {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.8rem;
+        }
+
+        .suggestion-chip {
+            background: white;
+            border: 1px solid var(--border);
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-main);
+        }
+
+        .suggestion-chip:hover {
+            border-color: var(--accent);
+            background: #faf8f5;
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chat-input-wrapper input {
+            flex-grow: 1;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            outline: none;
+            font-size: 0.95rem;
+        }
+
+        .chat-input-wrapper input:focus {
+            border-color: var(--accent);
+        }
+
+        /* PREMIUM DYNAMIC HIGHLIGHTER ENGINE STYLES */
+        .color-tab-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            height: 100%;
+        }
+
+        .presets-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            background: #faf8f5;
+            padding: 0.8rem 1rem;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+
+        /* NEW CUSTOM CREATOR PANEL STYLING */
+        .custom-color-creator {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            background: #fcfbfa;
+            padding: 0.8rem 1rem;
+            border-radius: 10px;
+            border: 1px dashed var(--accent);
+            margin-top: -0.5rem;
+        }
+
+        .creator-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .color-picker-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .picker-btn {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 32px;
+            height: 32px;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .picker-btn::-webkit-color-swatch {
+            border-radius: 50%;
+            border: 1px solid var(--border);
+        }
+
+        .picker-btn::-moz-color-swatch {
+            border-radius: 50%;
+            border: 1px solid var(--border);
+        }
+
+        .custom-label-input {
+            padding: 0.4rem 0.6rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            outline: none;
+            font-size: 0.85rem;
+            width: 200px;
+        }
+
+        .custom-label-input:focus {
+            border-color: var(--accent);
+        }
+
+        .color-key-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 1rem;
+        }
+
+        .color-key-card {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: white;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .color-key-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            border-color: var(--accent);
+        }
+
+        .card-delete-btn {
+            position: absolute;
+            top: 0.4rem;
+            right: 0.4rem;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            cursor: pointer;
+            opacity: 0.4;
+            transition: opacity 0.2s, color 0.2s;
+        }
+
+        .color-key-card:hover .card-delete-btn {
+            opacity: 1;
+        }
+
+        .card-delete-btn:hover {
+            color: #b35959;
+        }
+
+        .color-swatch-circle {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid rgba(0,0,0,0.08);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+        }
+
+        .color-label-input {
+            border: none;
+            border-bottom: 1px dashed var(--border);
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-main);
+            outline: none;
+            padding: 0.2rem 0;
+            width: 90%;
+            background: transparent;
+        }
+
+        .color-label-input:focus {
+            border-bottom-style: solid;
+            border-bottom-color: var(--accent);
+        }
+
+        /* Active Text Selection Floating Menu */
+        .highlighter-tooltip-menu {
+            position: absolute;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            box-shadow: 0 6px 20px rgba(142, 137, 133, 0.15);
+            border-radius: 30px;
+            padding: 0.4rem 0.6rem;
+            display: none;
+            gap: 0.4rem;
+            align-items: center;
+            z-index: 1000;
+            pointer-events: auto;
+        }
+
+        .tooltip-swatch {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 1px solid rgba(0,0,0,0.05);
+            transition: transform 0.15s;
+        }
+
+        .tooltip-swatch:hover {
+            transform: scale(1.2);
+        }
+
+        .tooltip-clear-btn {
+            background: none;
+            border: none;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            padding: 0 0.4rem;
+            cursor: pointer;
+            border-left: 1px solid var(--border);
+            margin-left: 0.2rem;
+        }
+
+        .tooltip-clear-btn:hover {
+            color: #b35959;
+        }
+
+        /* Analytics Dashboard Elements */
+        .analytics-container {
+            border-top: 1px solid var(--border);
+            padding-top: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .analytics-stats {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.2rem;
+        }
+
+        .stat-pill {
+            background: #faf8f5;
+            border: 1px solid var(--border);
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .highlight-index-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            max-height: 250px;
+            overflow-y: auto;
+            padding-right: 0.3rem;
+        }
+
+        .index-item {
+            font-size: 0.85rem;
+            padding: 0.6rem 0.8rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: #fdfdfc;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+
+        .index-item:hover {
+            background: #faf8f5;
+        }
+
+        .index-text {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 70%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>The Quiet Place</h1>
+        <p>Your intentional space for reflection and study</p>
+    </header>
+
+    <div class="workspace-container" id="workspaceContainer">
+        <div id="highlighterTooltip" class="highlighter-tooltip-menu">
+            </div>
+
+        <div class="scripture-panel">
+            <div class="panel-header">
+                <select id="bookSelect" class="selector" onchange="updateChapters()">
+                    </select>
+                <select id="chapterSelect" class="selector" onchange="loadScripture()">
+                    </select>
+                <select id="translationSelect" class="selector" onchange="loadScripture()">
+                    <option value="web">WEB (World English)</option>
+                    <option value="kjv">KJV (King James)</option>
+                    <option value="bbe">BBE (Basic English)</option>
+                    <option value="oeb">OEB (Open English)</option>
+                </select>
+            </div>
+            <div id="scriptureBody" class="scripture-content" onmouseup="handleTextSelection(event)">
+            </div>
+        </div>
+
+        <div class="workspace-panel">
+            <nav class="tabs-nav">
+                <button class="tab-btn" onclick="switchTab('journal')">✍️ Journal</button>
+                <button class="tab-btn" onclick="switchTab('chatbot')">🧠 Companion</button>
+                <button class="tab-btn" onclick="switchTab('colors')">🎨 Color Key</button>
+                <button class="tab-btn active" onclick="switchTab('log')">📋 Log</button>
+            </nav>
+
+            <div id="log" class="tab-content active">
+                <h2>Reading Log</h2>
+                <p style="color: var(--text-muted); margin-bottom: 1rem;">Keep tabs on your current journey.</p>
+                <div id="readingLogList" style="display:flex; flex-direction:column; gap:0.6rem;"></div>
+            </div>
+
+            <div id="journal" class="tab-content" style="height: calc(100% - 60px);">
+                <div class="journal-layout">
+                    <div class="journal-editor-pane">
+                        <div class="journal-meta">
+                            <span id="journalScriptureRef">Genesis 1 (WEB)</span>
+                            <select id="journalTemplate" class="selector" style="font-size: 0.8rem; padding: 0.3rem 0.6rem;" onchange="applyTemplate()">
+                                <option value="freeform">Freeform Reflection</option>
+                                <option value="soap">S.O.A.P. Template</option>
+                                <option value="devotional">Devotional Thoughts</option>
+                            </select>
+                        </div>
+                        <textarea id="journalBody" placeholder="What is this passage saying to you today? Double-click any verse in the reading pane to insert it..."></textarea>
+                        <div class="journal-actions">
+                            <button class="action-btn primary" onclick="saveEntry()">Save Reflection</button>
+                            <button class="action-btn secondary" onclick="startNewEntry()">New Entry</button>
+                            <button class="action-btn secondary" onclick="exportEntry()">Export MD</button>
+                            <span id="saveStatus" class="save-status"></span>
+                        </div>
+                    </div>
+                    <div class="journal-history-pane">
+                        <h3>Reflections History</h3>
+                        <div id="journalList" class="journal-list">
+                            </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="chatbot" class="tab-content" style="height: calc(100% - 60px);">
+                <div class="chat-layout">
+                    <div class="chat-header">
+                        <div class="chat-status-wrapper">
+                            <span id="chatStatusIndicator" class="status-indicator offline"></span>
+                            <span id="chatStatusText" style="font-weight: 500;">Offline Mode</span>
+                            <span style="color: var(--border);">|</span>
+                            <span id="chatContextTag" class="chat-context-tag">Genesis 1</span>
+                        </div>
+                        <button class="settings-toggle-btn" onclick="toggleApiKeyPanel()" title="Configure API Key">⚙️</button>
+                    </div>
+
+                    <div id="apiSettingsPane" class="settings-pane">
+                        <label for="geminiApiKey">Google Gemini API Key</label>
+                        <div class="api-input-group">
+                            <input type="password" id="geminiApiKey" placeholder="AIzaSy..." />
+                            <button class="action-btn primary" style="padding:0.4rem 1rem;" onclick="saveApiKey()">Save</button>
+                            <button class="action-btn secondary" style="padding:0.4rem 1rem;" onclick="clearApiKey()">Clear</button>
+                        </div>
+                        <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Your key remains sandboxed on your machine inside local browser storage.</p>
+                    </div>
+
+                    <div id="chatMessages" class="chat-messages">
+                        <div class="chat-msg-row ai">
+                            <div class="chat-bubble">
+                                Welcome to your quiet Study Companion space. Ask historical, translation, or application questions regarding the current passage.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="suggestion-pane">
+                        <button class="suggestion-chip" onclick="handleSuggestionClick('🏛️ Historical Context')">🏛️ Historical Context</button>
+                        <button class="suggestion-chip" onclick="handleSuggestionClick('📜 Greek/Hebrew Analysis')">📜 Greek/Hebrew</button>
+                        <button class="suggestion-chip" onclick="handleSuggestionClick('🔗 Cross References')">🔗 Cross References</button>
+                        <button class="suggestion-chip" onclick="handleSuggestionClick('💡 Life Application')">💡 Life Application</button>
+                    </div>
+
+                    <div class="chat-input-wrapper">
+                        <input type="text" id="chatUserInput" placeholder="Ask a question about the active scripture..." onkeydown="if(event.key === 'Enter') sendChatMessage()" />
+                        <button id="chatSendBtn" class="action-btn primary" onclick="sendChatMessage()">Send</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="colors" class="tab-content">
+                <div class="color-tab-layout">
+                    <div>
+                        <h2>Highlighting & Color Key</h2>
+                        <p style="color: var(--text-muted); margin-bottom: 1rem;">Highlight text strings inside the reading panel to save notes. Customize labels, apply study presets, or build your own custom topic codes below.</p>
+                    </div>
+
+                    <div class="presets-bar">
+                        <span style="font-size:0.85rem; font-weight:600; color:var(--text-muted);">Thematic Presets:</span>
+                        <button class="action-btn secondary" style="padding:0.3rem 0.8rem; font-size:0.8rem;" onclick="applyHighlightPreset('inductive')">Inductive Study</button>
+                        <button class="action-btn secondary" style="padding:0.3rem 0.8rem; font-size:0.8rem;" onclick="applyHighlightPreset('devotional')">Devotional Focus</button>
+                        <button class="action-btn secondary" style="padding:0.3rem 0.8rem; font-size:0.8rem;" onclick="applyHighlightPreset('reset')">Reset Key</button>
+                    </div>
+
+                    <div class="custom-color-creator">
+                        <span class="creator-title">✨Add Tag✨</span>
+                        <div class="color-picker-wrapper">
+                            <input type="color" id="customColorPicker" class="picker-btn" value="#ffccd5" title="Click to open color palette picker" />
+                        </div>
+                        <input type="text" id="customTopicLabel" class="custom-label-input" placeholder="Enter custom topic name..." onkeydown="if(event.key === 'Enter') addCustomColorKey()" />
+                        <button class="action-btn primary" style="padding: 0.4rem 1rem; font-size: 0.8rem;" onclick="addCustomColorKey()">Add Custom Topic Tag</button>
+                    </div>
+
+                    <div id="colorKeyGrid" class="color-key-grid">
+                        </div>
+
+                    <div class="analytics-container">
+                        <h3 style="font-family:'Cinzel', serif; font-size:1.1rem; margin-bottom:0.8rem; color:var(--text-main);">Highlights</h3>
+                        <div id="analyticsStats" class="analytics-stats">
+                            </div>
+                        <div id="highlightIndexList" class="highlight-index-list">
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const BIBLE_BOOKS = [
+            { name: "Genesis", chapters: 50 },
+            { name: "Exodus", chapters: 40 },
+            { name: "Leviticus", chapters: 27 },
+            { name: "Numbers", chapters: 36 },
+            { name: "Deuteronomy", chapters: 34 },
+            { name: "Joshua", chapters: 24 },
+            { name: "Judges", chapters: 21 },
+            { name: "Ruth", chapters: 4 },
+            { name: "1 Samuel", chapters: 31 },
+            { name: "2 Samuel", chapters: 24 },
+            { name: "1 Kings", chapters: 22 },
+            { name: "2 Kings", chapters: 25 },
+            { name: "1 Chronicles", chapters: 29 },
+            { name: "2 Chronicles", chapters: 36 },
+            { name: "Ezra", chapters: 10 },
+            { name: "Nehemiah", chapters: 13 },
+            { name: "Esther", chapters: 10 },
+            { name: "Job", chapters: 42 },
+            { name: "Psalms", chapters: 150 },
+            { name: "Proverbs", chapters: 31 },
+            { name: "Ecclesiastes", chapters: 12 },
+            { name: "Song of Solomon", chapters: 8 },
+            { name: "Isaiah", chapters: 66 },
+            { name: "Jeremiah", chapters: 52 },
+            { name: "Lamentations", chapters: 5 },
+            { name: "Ezekiel", chapters: 48 },
+            { name: "Daniel", chapters: 12 },
+            { name: "Hosea", chapters: 14 },
+            { name: "Joel", chapters: 3 },
+            { name: "Amos", chapters: 9 },
+            { name: "Obadiah", chapters: 1 },
+            { name: "Jonah", chapters: 4 },
+            { name: "Micah", chapters: 7 },
+            { name: "Nahum", chapters: 3 },
+            { name: "Habakkuk", chapters: 3 },
+            { name: "Zephaniah", chapters: 3 },
+            { name: "Haggai", chapters: 2 },
+            { name: "Zechariah", chapters: 14 },
+            { name: "Malachi", chapters: 4 },
+            { name: "Matthew", chapters: 28 },
+            { name: "Mark", chapters: 16 },
+            { name: "Luke", chapters: 24 },
+            { name: "John", chapters: 21 },
+            { name: "Acts", chapters: 28 },
+            { name: "Romans", chapters: 16 },
+            { name: "1 Corinthians", chapters: 16 },
+            { name: "2 Corinthians", chapters: 13 },
+            { name: "Galatians", chapters: 6 },
+            { name: "Ephesians", chapters: 6 },
+            { name: "Philippians", chapters: 4 },
+            { name: "Colossians", chapters: 4 },
+            { name: "1 Thessalonians", chapters: 5 },
+            { name: "2 Thessalonians", chapters: 3 },
+            { name: "1 Timothy", chapters: 6 },
+            { name: "2 Timothy", chapters: 4 },
+            { name: "Titus", chapters: 3 },
+            { name: "Philemon", chapters: 1 },
+            { name: "Hebrews", chapters: 13 },
+            { name: "James", chapters: 5 },
+            { name: "1 Peter", chapters: 5 },
+            { name: "2 Peter", chapters: 3 },
+            { name: "1 John", chapters: 5 },
+            { name: "2 John", chapters: 1 },
+            { name: "3 John", chapters: 1 },
+            { name: "Jude", chapters: 1 },
+            { name: "Revelation", chapters: 22 }
+        ];
+
+        // Core App Context States
+        let chatMessagesHistory = [];
+        let isChatLoading = false;
+        let selectedTextRangeInfo = null;
+
+        // Custom Highlighting Systems Schema Setup
+        let colorKeyPalette = [
+            { id: "color1", color: "#fff0b3", label: "Character of God / Grace" },
+            { id: "color2", color: "#c6ecd9", label: "Commands & Instructions" },
+            { id: "color3", color: "#cfe2f3", label: "Promises & Prophecy" },
+            { id: "color4", color: "#f4cccc", label: "Sins & Warning Signs" },
+            { id: "color5", color: "#e1bfe7", label: "Theological Insights" }
+        ];
+        let savedHighlightsIndex = []; // Objects structure: { id, book, chapter, verse, text, colorId }
+
+        const PRESET_SYSTEMS = {
+            inductive: [
+                { id: "color1", color: "#ffd700", label: "God / Jesus / Holy Spirit" },
+                { id: "color2", color: "#b3ffb3", label: "Commands & Duties" },
+                { id: "color3", color: "#99ccff", label: "Promises & Blessings" },
+                { id: "color4", color: "#ffb3b3", label: "Sin & Corrections" },
+                { id: "color5", color: "#e6ccff", label: "Faith / Covenants" }
+            ],
+            devotional: [
+                { id: "color1", color: "#ffe599", label: "Key Life Takeaway" },
+                { id: "color2", color: "#d9ead3", label: "Wisdom to Apply" },
+                { id: "color3", color: "#c9daf8", label: "Encouragement / Peace" },
+                { id: "color4", color: "#f4cccc", label: "Personal Conviction" },
+                { id: "color5", color: "#ead1dc", label: "Prayer Catalyst" }
+            ],
+            reset: [
+                { id: "color1", color: "#fff0b3", label: "Character of God / Grace" },
+                { id: "color2", color: "#c6ecd9", label: "Commands & Instructions" },
+                { id: "color3", color: "#cfe2f3", label: "Promises & Prophecy" },
+                { id: "color4", color: "#f4cccc", label: "Sins & Warning Signs" },
+                { id: "color5", color: "#e1bfe7", label: "Theological Insights" }
+            ]
+        };
+
+        const OFFLINE_MOCK_RESPONSES = {
+            "historical context": "Historically, this section grounds the narrative within ancient Near Eastern literary frameworks, while showcasing unique theological differences. It addresses order, sovereign creation, and structure shifting from structural chaos into functional harmony.",
+            "greek/hebrew analysis": "Examining original lexical items reveals deep textual patterns. For instance, structural keywords underscore complete sovereign selection and cosmic design terms that focus heavily on functionality over mere physical materialization.",
+            "cross references": "This text shares thematic cross-connective links with classical poetic reflections (e.g., specific target segments in Psalms), early prologues in New Testament systematic contexts, and apocalyptic restoration mappings toward global renewal lines.",
+            "life application": "In a modern application framework, this passage emphasizes intentional rhythms. It challenges readers to build reflective boundaries out of unstructured spaces and recognize baseline patterns of beauty and rest amid complex routines."
+        };
+
+        function initSelectors() {
+            const bookSelect = document.getElementById('bookSelect');
+            if (!bookSelect) return;
+            bookSelect.innerHTML = '';
+            BIBLE_BOOKS.forEach(book => {
+                const option = document.createElement('option');
+                option.value = book.name;
+                option.textContent = book.name;
+                bookSelect.appendChild(option);
+            });
+            updateChapters();
+        }
+
+        function updateChapters() {
+            const bookName = document.getElementById('bookSelect').value;
+            const chapterSelect = document.getElementById('chapterSelect');
+            const bookObj = BIBLE_BOOKS.find(b => b.name === bookName);
+
+            chapterSelect.innerHTML = '';
+            if (bookObj) {
+                for (let i = 1; i <= bookObj.chapters; i++) {
+                    const option = document.createElement('option');
+                    option.value = i;
+                    option.textContent = `Chapter ${i}`;
+                    chapterSelect.appendChild(option);
+                }
+            }
+            loadScripture();
+        }
+
+        let journalEntries = [];
+        let activeEntryId = null;
+
+        const JOURNAL_TEMPLATES = {
+            freeform: "",
+            soap: `### Scripture\n[Double-click verses in the reading pane to insert them here]\n\n### Observation\n\n\n### Application\n\n\n### Prayer\n`,
+            devotional: `### Key Takeaway\n\n\n### God's Character Revealed\n\n\n### Personal Action Step\n`
+        };
+
+        function applyTemplate() {
+            const journalBody = document.getElementById('journalBody');
+            const templateVal = document.getElementById('journalTemplate').value;
+            if (!journalBody) return;
+            
+            if (journalBody.value.trim() !== "") {
+                if (!confirm("Applying a template will overwrite your current draft. Do you want to proceed?")) {
+                    return;
+                }
+            }
+            
+            journalBody.value = JOURNAL_TEMPLATES[templateVal] || "";
+            journalBody.focus();
+        }
+
+        function loadJournalEntries() {
+            try {
+                journalEntries = JSON.parse(localStorage.getItem('quiet_place_journal') || '[]');
+            } catch (e) {
+                console.error("Failed to load journal entries", e);
+                journalEntries = [];
+            }
+            renderJournalList();
+        }
+
+        function saveEntry() {
+            const body = document.getElementById('journalBody').value.trim();
+            if (!body) {
+                alert("Please write something before saving.");
+                return;
+            }
+            
+            const scriptureRef = document.getElementById('journalScriptureRef').textContent;
+            const now = new Date();
+            
+            const newEntry = {
+                id: activeEntryId || Date.now().toString(),
+                ref: scriptureRef,
+                body: body,
+                date: now.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }),
+                time: now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
+            };
+            
+            if (activeEntryId) {
+                const index = journalEntries.findIndex(e => e.id === activeEntryId);
+                if (index !== -1) {
+                    journalEntries[index] = newEntry;
+                } else {
+                    journalEntries.unshift(newEntry);
+                }
+            } else {
+                journalEntries.unshift(newEntry);
+                activeEntryId = newEntry.id;
+            }
+            
+            localStorage.setItem('quiet_place_journal', JSON.stringify(journalEntries));
+            
+            const saveStatus = document.getElementById('saveStatus');
+            if (saveStatus) {
+                saveStatus.textContent = "Saved successfully!";
+                setTimeout(() => { saveStatus.textContent = ""; }, 3000);
+            }
+            
+            renderJournalList();
+        }
+
+        function startNewEntry() {
+            activeEntryId = null;
+            const bodyTextarea = document.getElementById('journalBody');
+            if (bodyTextarea) bodyTextarea.value = '';
+            
+            const templateSelect = document.getElementById('journalTemplate');
+            if (templateSelect) templateSelect.value = 'freeform';
+            
+            const book = document.getElementById('bookSelect').value;
+            const chapter = document.getElementById('chapterSelect').value;
+            const trans = document.getElementById('translationSelect').value.toUpperCase();
+            
+            const refHeader = document.getElementById('journalScriptureRef');
+            if (refHeader) refHeader.textContent = `${book} ${chapter} (${trans})`;
+            
+            renderJournalList();
+        }
+
+        function renderJournalList() {
+            const listDiv = document.getElementById('journalList');
+            if (!listDiv) return;
+            listDiv.innerHTML = '';
+            
+            if (journalEntries.length === 0) {
+                listDiv.innerHTML = `<p style="color: var(--text-muted); font-size: 0.85rem; text-align: center; margin-top: 1rem;">No saved reflections yet.</p>`;
+                return;
+            }
+            
+            journalEntries.forEach(entry => {
+                const item = document.createElement('div');
+                item.className = `journal-item ${activeEntryId === entry.id ? 'active' : ''}`;
+                item.onclick = () => selectEntry(entry.id);
+                
+                const snippet = entry.body.substring(0, 60) + (entry.body.length > 60 ? '...' : '');
+                
+                item.innerHTML = `
+                    <div class="journal-item-title">${entry.ref}</div>
+                    <div class="journal-item-meta">
+                        <span>${entry.date}</span>
+                        <span>${entry.time}</span>
+                    </div>
+                    <div class="journal-item-snippet">${escapeHtml(snippet)}</div>
+                    <button class="journal-delete-btn" onclick="deleteEntry(event, '${entry.id}')" title="Delete entry">&times;</button>
+                `;
+                listDiv.appendChild(item);
+            });
+        }
+
+        function selectEntry(id) {
+            const entry = journalEntries.find(e => e.id === id);
+            if (!entry) return;
+            
+            activeEntryId = id;
+            document.getElementById('journalBody').value = entry.body;
+            document.getElementById('journalScriptureRef').textContent = entry.ref;
+            
+            const match = entry.ref.match(/^(.+?)\s+(\d+)\s+\((.+?)\)$/);
+            if (match) {
+                const book = match[1];
+                const chapter = parseInt(match[2], 10);
+                const trans = match[3].toLowerCase();
+                
+                const bookSelect = document.getElementById('bookSelect');
+                const transSelect = document.getElementById('translationSelect');
+                
+                if (bookSelect && bookSelect.value !== book) {
+                    bookSelect.value = book;
+                    updateChaptersWithTarget(chapter, trans);
+                } else {
+                    const chapSelect = document.getElementById('chapterSelect');
+                    if (chapSelect && parseInt(chapSelect.value, 10) !== chapter) {
+                        chapSelect.value = chapter;
+                    }
+                    if (transSelect && transSelect.value !== trans) {
+                        transSelect.value = trans;
+                    }
+                    loadScripture();
+                }
+            }
+            renderJournalList();
+        }
+
+        function updateChaptersWithTarget(targetChapter, targetTrans) {
+            const bookName = document.getElementById('bookSelect').value;
+            const chapterSelect = document.getElementById('chapterSelect');
+            const transSelect = document.getElementById('translationSelect');
+            const bookObj = BIBLE_BOOKS.find(b => b.name === bookName);
+            
+            chapterSelect.innerHTML = '';
+            if (bookObj) {
+                for (let i = 1; i <= bookObj.chapters; i++) {
+                    const option = document.createElement('option');
+                    option.value = i;
+                    option.textContent = `Chapter ${i}`;
+                    chapterSelect.appendChild(option);
+                }
+            }
+            if (targetChapter) chapterSelect.value = targetChapter;
+            if (targetTrans && transSelect) transSelect.value = targetTrans;
+            loadScripture();
+        }
+
+        function deleteEntry(event, id) {
+            event.stopPropagation();
+            if (!confirm("Are you sure you want to delete this journal entry?")) return;
+            
+            journalEntries = journalEntries.filter(e => e.id !== id);
+            localStorage.setItem('quiet_place_journal', JSON.stringify(journalEntries));
+            
+            if (activeEntryId === id) startNewEntry();
+            else renderJournalList();
+        }
+
+        function exportEntry() {
+            const body = document.getElementById('journalBody').value.trim();
+            if (!body) {
+                alert("There is no text to export.");
+                return;
+            }
+            const ref = document.getElementById('journalScriptureRef').textContent;
+            const date = new Date().toISOString().slice(0, 10);
+            
+            const fileContent = `# Reflection: ${ref}\nCreated on: ${new Date().toLocaleString()}\n\n${body}`;
+            const blob = new Blob([fileContent], { type: 'text/markdown;charset=utf-8;' });
+            const link = document.createElement("a");
+            
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `Reflection_${ref.replace(/[\s\(\)]+/g, '_')}_${date}.md`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function insertVerseToJournal(element) {
+            const journalBody = document.getElementById('journalBody');
+            if (!journalBody) return;
+            
+            const ref = element.getAttribute('data-ref');
+            const text = element.getAttribute('data-text');
+            
+            switchTab('journal');
+            
+            const insertion = `\n> [${ref}] "${text}"\n`;
+            journalBody.value = (journalBody.value.trim() + insertion).trim() + '\n';
+            journalBody.focus();
+            
+            element.style.backgroundColor = '#eef3ef';
+            setTimeout(() => { element.style.backgroundColor = 'transparent'; }, 600);
+        }
+
+        function escapeHtml(text) {
+            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        async function loadScripture() {
+            const book = document.getElementById('bookSelect').value;
+            const chapter = document.getElementById('chapterSelect').value;
+            const translation = document.getElementById('translationSelect').value;
+            const contentDiv = document.getElementById('scriptureBody');
+            
+            if (!contentDiv) return;
+            hideHighlighterTooltip();
+
+            contentDiv.innerHTML = `
+                <div class="loader-container">
+                    <div class="spinner"></div>
+                    <p>Fetching scripture from the quiet place...</p>
+                </div>
+            `;
+
+            try {
+                const url = `https://bible-api.com/${encodeURIComponent(book + ' ' + chapter)}?translation=${translation}`;
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`Failed to load: ${response.statusText}`);
+                
+                const data = await response.json();
+                if (!data || !data.verses || data.verses.length === 0) throw new Error("No scripture found.");
+
+                let html = `<h3>${data.reference}</h3><br>`;
+                data.verses.forEach(v => {
+                    const cleanedText = v.text.trim().replace(/\n/g, '<br>');
+                    html += `<p class="verse-paragraph" id="verse-${v.verse}" data-verse-num="${v.verse}" data-ref="${data.reference}:${v.verse}" data-text="${cleanedText.replace(/"/g, '&quot;')}" ondblclick="insertVerseToJournal(this)"><span class="verse-num">${v.verse}</span><span class="verse-text-span">${cleanedText}</span></p><br>`;
+                });
+                
+                contentDiv.innerHTML = html;
+                
+                logReadingChapter(book, chapter, translation.toUpperCase());
+                applyStoredHighlightsToDOM(book, chapter);
+                
+                const contextTag = document.getElementById('chatContextTag');
+                if (contextTag) contextTag.textContent = `${book} ${chapter}`;
+                
+                if (!activeEntryId) {
+                    const refHeader = document.getElementById('journalScriptureRef');
+                    if (refHeader) refHeader.textContent = `${data.reference} (${translation.toUpperCase()})`;
+                }
+            } catch (error) {
+                console.error("Error fetching scripture:", error);
+                contentDiv.innerHTML = `
+                    <div class="error-container">
+                        <h4 class="error-title">Unable to Connect</h4>
+                        <p class="error-msg">We couldn't load the scripture text. Check your net configuration and try again.</p>
+                        <button class="retry-btn" onclick="loadScripture()">Retry</button>
+                    </div>
+                `;
+            }
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            const btn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
+            if (btn) btn.classList.add('active');
+            const targetContent = document.getElementById(tabId);
+            if (targetContent) targetContent.classList.add('active');
+            
+            if (tabId === 'chatbot') scrollToLatestMessage();
+        }
+
+        /* STUDY COMPANION LOGIC CORE ENGINE */
+        function getSavedApiKey() { return localStorage.getItem('gemini_study_companion_key') || ''; }
+
+        function updateChatStatusUI() {
+            const key = getSavedApiKey();
+            const indicator = document.getElementById('chatStatusIndicator');
+            const statusText = document.getElementById('chatStatusText');
+            const keyInput = document.getElementById('geminiApiKey');
+            
+            if (keyInput) keyInput.value = key;
+            if (key) {
+                indicator.className = "status-indicator connected";
+                statusText.textContent = "Connected";
+            } else {
+                indicator.className = "status-indicator offline";
+                statusText.textContent = "Offline Mode";
+            }
+        }
+
+        function toggleApiKeyPanel() {
+            const pane = document.getElementById('apiSettingsPane');
+            pane.style.display = (pane.style.display === 'flex') ? 'none' : 'flex';
+        }
+
+        function saveApiKey() {
+            const key = document.getElementById('geminiApiKey').value.trim();
+            if (!key) {
+                alert("Please enter an API Key before saving.");
+                return;
+            }
+            localStorage.setItem('gemini_study_companion_key', key);
+            updateChatStatusUI();
+            toggleApiKeyPanel();
+        }
+
+        function clearApiKey() {
+            localStorage.removeItem('gemini_study_companion_key');
+            document.getElementById('geminiApiKey').value = '';
+            updateChatStatusUI();
+            toggleApiKeyPanel();
+        }
+
+        function getActiveScriptureTextForAI() {
+            const body = document.getElementById('scriptureBody');
+            if (!body) return "";
+            const paras = body.getElementsByClassName('verse-paragraph');
+            let fullText = "";
+            for (let p of paras) {
+                fullText += `Verse ${p.getAttribute('data-ref')}: ${p.getAttribute('data-text')}\n`;
+            }
+            return fullText || "No active scripture selected.";
+        }
+
+        function appendMessageBubble(sender, text, holdsActions = false) {
+            const messagesBox = document.getElementById('chatMessages');
+            const msgRow = document.createElement('div');
+            msgRow.className = `chat-msg-row ${sender}`;
+            
+            const bubble = document.createElement('div');
+            bubble.className = "chat-bubble";
+            bubble.innerHTML = text.replace(/\n/g, '<br>');
+            
+            if (holdsActions && sender === 'ai') {
+                const actionBtn = document.createElement('button');
+                actionBtn.className = "chat-pin-btn";
+                actionBtn.textContent = "📋 Send to Journal";
+                const sanitationString = text.replace(/"/g, '&quot;').replace(/'/g, "\\'");
+                actionBtn.setAttribute('onclick', `copyChatToJournal('${sanitationString}')`);
+                bubble.appendChild(actionBtn);
+            }
+            
+            msgRow.appendChild(bubble);
+            messagesBox.appendChild(msgRow);
+            scrollToLatestMessage();
+        }
+
+        function appendTypingIndicator() {
+            const messagesBox = document.getElementById('chatMessages');
+            const indicatorRow = document.createElement('div');
+            indicatorRow.className = "chat-msg-row ai";
+            indicatorRow.id = "chatTypingIndicatorRow";
+            
+            const bubble = document.createElement('div');
+            bubble.className = "chat-bubble";
+            const indicator = document.createElement('div');
+            indicator.className = "typing-indicator";
+            indicator.innerHTML = "<span></span><span></span><span></span>";
+            
+            bubble.appendChild(indicator);
+            indicatorRow.appendChild(bubble);
+            messagesBox.appendChild(indicatorRow);
+            scrollToLatestMessage();
+        }
+
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('chatTypingIndicatorRow');
+            if (indicator) indicator.remove();
+        }
+
+        function scrollToLatestMessage() {
+            const box = document.getElementById('chatMessages');
+            if (box) box.scrollTop = box.scrollHeight;
+        }
+
+        function copyChatToJournal(text) {
+            const journalBody = document.getElementById('journalBody');
+            if (!journalBody) return;
+            switchTab('journal');
+            const formattedBlockquote = `\n> ### Study Companion Insight\n> ${text.replace(/\n/g, '\n> ')}\n`;
+            journalBody.value = (journalBody.value.trim() + formattedBlockquote).trim() + '\n';
+            journalBody.focus();
+        }
+
+        function handleSuggestionClick(suggestionTitle) {
+            if (isChatLoading) return;
+            const book = document.getElementById('bookSelect').value;
+            const chapter = document.getElementById('chapterSelect').value;
+            const completePrompt = `Provide ${suggestionTitle} context for ${book} Chapter ${chapter}.`;
+            executeMessageProcessing(completePrompt);
+        }
+
+        function sendChatMessage() {
+            if (isChatLoading) return;
+            const inputField = document.getElementById('chatUserInput');
+            const queryText = inputField.value.trim();
+            if (!queryText) return;
+            
+            inputField.value = '';
+            executeMessageProcessing(queryText);
+        }
+
+        async function executeMessageProcessing(prompt) {
+            isChatLoading = true;
+            appendMessageBubble('user', prompt);
+            appendTypingIndicator();
+            
+            const apiKey = getSavedApiKey();
+            const currentBook = document.getElementById('bookSelect').value;
+            const currentChapter = document.getElementById('chapterSelect').value;
+            
+            if (!apiKey) {
+                setTimeout(() => {
+                    removeTypingIndicator();
+                    let cleanPromptLower = prompt.toLowerCase();
+                    let localizedAnswer = OFFLINE_MOCK_RESPONSES["life application"];
+                    
+                    for (let pattern in OFFLINE_MOCK_RESPONSES) {
+                        if (cleanPromptLower.includes(pattern)) {
+                            localizedAnswer = OFFLINE_MOCK_RESPONSES[pattern];
+                            break;
+                        }
+                    }
+                    const finalizedOfflineOutput = `[Offline Mode Fallback insight for ${currentBook} ${currentChapter}]:\n\n${localizedAnswer}`;
+                    appendMessageBubble('ai', finalizedOfflineOutput, true);
+                    isChatLoading = false;
+                }, 750);
+            } else {
+                try {
+                    const activeScriptureContext = getActiveScriptureTextForAI();
+                    const targetEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+                    const structuralSystemInstruction = `You are a calm, scholarly, and supportive AI Study Companion inside a minimalist Bible reading application named "The Quiet Place". Provide insightful answers focusing on historical background, translation context, cross-references, or lifestyle applications based on the active text context supplied. Keep answers organized and scannable without dense text blocks.`;
+                    
+                    let runtimeContentsPayload = [{
+                        role: "user",
+                        parts: [{ text: `Active Text Context:\n${activeScriptureContext}\n\nUser Question:\n${prompt}` }]
+                    }];
+
+                    const apiResponse = await fetch(targetEndpoint, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: runtimeContentsPayload,
+                            systemInstruction: { parts: [{ text: structuralSystemInstruction }] },
+                            generationConfig: { temperature: 0.3, maxOutputTokens: 1024 }
+                        })
+                    });
+
+                    if (!apiResponse.ok) throw new Error(`API Error Status: ${apiResponse.status}`);
+
+                    const jsonResult = await apiResponse.json();
+                    removeTypingIndicator();
+
+                    if (jsonResult.candidates && jsonResult.candidates[0].content.parts[0].text) {
+                        const aiFinalTextResponse = jsonResult.candidates[0].content.parts[0].text.trim();
+                        appendMessageBubble('ai', aiFinalTextResponse, true);
+                    } else {
+                        throw new Error("Malformed JSON received.");
+                    }
+                } catch (connectionError) {
+                    console.error("Gemini Gateway Error: ", connectionError);
+                    removeTypingIndicator();
+                    appendMessageBubble('ai', "⚠️ Failed to reach Gemini network. Verify your API Key configuration, data networks, or fallback to offline channels.");
+                } finally {
+                    isChatLoading = false;
+                }
+            }
+        }
+
+        /* PREMIUM DYNAMIC HIGHLIGHTER ENGINE LOGIC JS */
+        function loadHighlighterSystem() {
+            try {
+                const storedPalette = localStorage.getItem('quiet_place_color_palette');
+                if (storedPalette) colorKeyPalette = JSON.parse(storedPalette);
+                
+                const storedHighlights = localStorage.getItem('quiet_place_highlights');
+                if (storedHighlights) savedHighlightsIndex = JSON.parse(storedHighlights);
+            } catch (err) {
+                console.error("Failed parsing highlighter data sets", err);
+            }
+            renderColorPaletteConfigurationPanel();
+            renderTooltipMenuSwatches();
+            renderAnalyticsDashboard();
+        }
+
+        function renderColorPaletteConfigurationPanel() {
+            const grid = document.getElementById('colorKeyGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            colorKeyPalette.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "color-key-card";
+                
+                card.innerHTML = `
+                    <div class="color-swatch-circle" style="background-color: ${item.color};">🖍️</div>
+                    <div style="flex-grow: 1;">
+                        <input type="text" class="color-label-input" value="${escapeHtml(item.label)}" data-id="${item.id}" onchange="updateColorLabel(this)" placeholder="Name this color tag..." />
+                    </div>
+                    <button class="card-delete-btn" onclick="deleteColorKey('${item.id}')" title="Remove custom color tracking tag">&times;</button>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        /* NEW CUSTOM TOPIC REGISTRATION LOOPS */
+        function addCustomColorKey() {
+            const labelInput = document.getElementById('customTopicLabel');
+            const colorPicker = document.getElementById('customColorPicker');
+            const labelText = labelInput.value.trim();
+
+            if (!labelText) {
+                alert("Please provide a name or topic label for your custom color code.");
+                return;
+            }
+
+            const uniqueId = "custom_" + Date.now().toString();
+            const newColorItem = {
+                id: uniqueId,
+                color: colorPicker.value,
+                label: labelText
+            };
+
+            colorKeyPalette.push(newColorItem);
+            localStorage.setItem('quiet_place_color_palette', JSON.stringify(colorKeyPalette));
+            
+            // Reset fields
+            labelInput.value = '';
+            
+            // Refresh view components everywhere
+            renderColorPaletteConfigurationPanel();
+            renderTooltipMenuSwatches();
+            renderAnalyticsDashboard();
+            
+            // Force active view refresh pipeline if an active text layer exists
+            const currentBook = document.getElementById('bookSelect').value;
+            const currentChapter = document.getElementById('chapterSelect').value;
+            applyStoredHighlightsToDOM(currentBook, currentChapter);
+        }
+
+        function deleteColorKey(id) {
+            if (!confirm("Are you sure you want to remove this category tag from your workspace palette? Highlights utilizing this color code will be detached.")) return;
+            
+            colorKeyPalette = colorKeyPalette.filter(p => p.id !== id);
+            savedHighlightsIndex = savedHighlightsIndex.filter(h => h.colorId !== id);
+            
+            localStorage.setItem('quiet_place_color_palette', JSON.stringify(colorKeyPalette));
+            localStorage.setItem('quiet_place_highlights', JSON.stringify(savedHighlightsIndex));
+            
+            renderColorPaletteConfigurationPanel();
+            renderTooltipMenuSwatches();
+            renderAnalyticsDashboard();
+
+            const currentBook = document.getElementById('bookSelect').value;
+            const currentChapter = document.getElementById('chapterSelect').value;
+            applyStoredHighlightsToDOM(currentBook, currentChapter);
+        }
+
+        function renderTooltipMenuSwatches() {
+            const tooltip = document.getElementById('highlighterTooltip');
+            if (!tooltip) return;
+            tooltip.innerHTML = '';
+
+            colorKeyPalette.forEach(item => {
+                const swatch = document.createElement('div');
+                swatch.className = "tooltip-swatch";
+                swatch.style.backgroundColor = item.color;
+                swatch.title = item.label;
+                swatch.onclick = () => executeHighlightApplication(item.id);
+                tooltip.appendChild(swatch);
+            });
+
+            const clearBtn = document.createElement('button');
+            clearBtn.className = "tooltip-clear-btn";
+            clearBtn.textContent = "Clear";
+            clearBtn.onclick = () => executeHighlightApplication(null);
+            tooltip.appendChild(clearBtn);
+        }
+
+        function updateColorLabel(inputElement) {
+            const id = inputElement.getAttribute('data-id');
+            const targetVal = inputElement.value.trim() || "Untitled System";
+            
+            const matchIndex = colorKeyPalette.findIndex(p => p.id === id);
+            if (matchIndex !== -1) {
+                colorKeyPalette[matchIndex].label = targetVal;
+                localStorage.setItem('quiet_place_color_palette', JSON.stringify(colorKeyPalette));
+            }
+            renderTooltipMenuSwatches();
+            renderAnalyticsDashboard();
+        }
+
+        function applyHighlightPreset(presetKey) {
+            if (presetKey === 'reset' || confirm(`Are you sure you want to apply the ${presetKey} palette preset? This will change your color topic mappings.`)) {
+                colorKeyPalette = JSON.parse(JSON.stringify(PRESET_SYSTEMS[presetKey]));
+                localStorage.setItem('quiet_place_color_palette', JSON.stringify(colorKeyPalette));
+                renderColorPaletteConfigurationPanel();
+                renderTooltipMenuSwatches();
+                renderAnalyticsDashboard();
+                
+                const currentBook = document.getElementById('bookSelect').value;
+                const currentChapter = document.getElementById('chapterSelect').value;
+                applyStoredHighlightsToDOM(currentBook, currentChapter);
+            }
+        }
+
+        function handleTextSelection(event) {
+            const selection = window.getSelection();
+            if (!selection || selection.isCollapsed || selection.toString().trim() === "") {
+                hideHighlighterTooltip();
+                return;
+            }
+
+            const selectionRange = selection.getRangeAt(0);
+            
+            let nodeAncestor = selectionRange.commonAncestorContainer;
+            if (nodeAncestor.nodeType !== 1) nodeAncestor = nodeAncestor.parentNode;
+            
+            const verseParent = nodeAncestor.closest('.verse-paragraph');
+            if (!verseParent) {
+                hideHighlighterTooltip();
+                return;
+            }
+
+            const verseNum = verseParent.getAttribute('data-verse-num');
+            const selectedTextString = selection.toString();
+
+            selectedTextRangeInfo = {
+                book: document.getElementById('bookSelect').value,
+                chapter: document.getElementById('chapterSelect').value,
+                verse: verseNum,
+                text: selectedTextString
+            };
+
+            const boundingClientRect = selectionRange.getBoundingClientRect();
+            const containerBox = document.getElementById('workspaceContainer').getBoundingClientRect();
+            const tooltip = document.getElementById('highlighterTooltip');
+
+            tooltip.style.display = 'flex';
+            tooltip.style.top = `${boundingClientRect.top - containerBox.top - tooltip.offsetHeight - 8}px`;
+            tooltip.style.left = `${boundingClientRect.left - containerBox.left + (boundingClientRect.width / 2) - (tooltip.offsetWidth / 2)}px`;
+        }
+
+        function hideHighlighterTooltip() {
+            const tooltip = document.getElementById('highlighterTooltip');
+            if (tooltip) tooltip.style.display = 'none';
+            selectedTextRangeInfo = null;
+        }
+
+        function executeHighlightApplication(colorId) {
+            if (!selectedTextRangeInfo) return;
+
+            const activeBook = selectedTextRangeInfo.book;
+            const activeChapter = selectedTextRangeInfo.chapter;
+            const activeVerse = selectedTextRangeInfo.verse;
+            const textToMatch = selectedTextRangeInfo.text;
+
+            savedHighlightsIndex = savedHighlightsIndex.filter(h => 
+                !(h.book === activeBook && h.chapter === activeChapter && h.verse === activeVerse && h.text === textToMatch)
+            );
+
+            if (colorId) {
+                savedHighlightsIndex.push({
+                    id: Date.now().toString(),
+                    book: activeBook,
+                    chapter: activeChapter,
+                    verse: activeVerse,
+                    text: textToMatch,
+                    colorId: colorId
+                });
+            }
+
+            localStorage.setItem('quiet_place_highlights', JSON.stringify(savedHighlightsIndex));
+            
+            window.getSelection().removeAllRanges();
+            hideHighlighterTooltip();
+            
+            applyStoredHighlightsToDOM(activeBook, activeChapter);
+            renderAnalyticsDashboard();
+        }
+
+        function applyStoredHighlightsToDOM(currentBook, currentChapter) {
+            const currentHighlights = savedHighlightsIndex.filter(h => h.book === currentBook && h.chapter === currentChapter);
+            
+            const paragraphs = document.getElementsByClassName('verse-paragraph');
+            for (let p of paragraphs) {
+                const rawBaseText = p.getAttribute('data-text');
+                const textSpanNode = p.querySelector('.verse-text-span');
+                if (textSpanNode) textSpanNode.innerHTML = rawBaseText;
+            }
+
+            currentHighlights.forEach(hl => {
+                const verseNode = document.getElementById(`verse-${hl.verse}`);
+                if (!verseNode) return;
+
+                const textSpanNode = verseNode.querySelector('.verse-text-span');
+                if (!textSpanNode) return;
+
+                const currentInnerHTML = textSpanNode.innerHTML;
+                const matchColorObj = colorKeyPalette.find(p => p.id === hl.colorId);
+                if (!matchColorObj) return;
+
+                const safeRegexString = hl.text.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+                const regexPattern = new RegExp(safeRegexString, 'g');
+
+                const wrappedReplacementText = `<span style="background-color: ${matchColorObj.color}; border-radius: 3px; padding: 0 2px;">${hl.text}</span>`;
+                
+                textSpanNode.innerHTML = currentInnerHTML.replace(regexPattern, wrappedReplacementText);
+            });
+        }
+
+        function renderAnalyticsDashboard() {
+            const statsDiv = document.getElementById('analyticsStats');
+            const indexListDiv = document.getElementById('highlightIndexList');
+            if (!statsDiv || !indexListDiv) return;
+
+            statsDiv.innerHTML = '';
+            indexListDiv.innerHTML = '';
+
+            colorKeyPalette.forEach(paletteItem => {
+                const matchesCount = savedHighlightsIndex.filter(h => h.colorId === paletteItem.id).length;
+                
+                const pill = document.createElement('div');
+                pill.className = "stat-pill";
+                pill.innerHTML = `
+                    <span style="width:12px; height:12px; border-radius:50%; background-color:${paletteItem.color}; display:inline-block;"></span>
+                    <span>${paletteItem.label}: <strong>${matchesCount}</strong></span>
+                `;
+                statsDiv.appendChild(pill);
+            });
+
+            if (savedHighlightsIndex.length === 0) {
+                indexListDiv.innerHTML = `<p style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 1rem 0;">No text selection highlights tracked yet.</p>`;
+                return;
+            }
+
+            savedHighlightsIndex.forEach(hl => {
+                const paletteColor = colorKeyPalette.find(p => p.id === hl.colorId) || { color: '#eee', label: 'General' };
+                
+                const itemRow = document.createElement('div');
+                itemRow.className = "index-item";
+                itemRow.style.borderLeft = `4px solid ${paletteColor.color}`;
+                itemRow.onclick = () => jumpToScriptureTargetReference(hl.book, hl.chapter, hl.verse);
+
+                itemRow.innerHTML = `
+                    <div class="index-text">"${escapeHtml(hl.text)}"</div>
+                    <div style="font-size:0.75rem; font-weight:600; color:var(--text-muted); text-align:right;">
+                        ${hl.book} ${hl.chapter}:${hl.verse} <span style="font-weight:400; font-size:0.7rem; display:block; color:var(--accent);">${paletteColor.label}</span>
+                    </div>
+                `;
+                indexListDiv.appendChild(itemRow);
+            });
+        }
+
+        function jumpToScriptureTargetReference(targetBook, targetChapter, targetVerseNum) {
+            const bookSelect = document.getElementById('bookSelect');
+            const chapterSelect = document.getElementById('chapterSelect');
+
+            if (bookSelect.value !== targetBook) {
+                bookSelect.value = targetBook;
+                const bookObj = BIBLE_BOOKS.find(b => b.name === targetBook);
+                chapterSelect.innerHTML = '';
+                if (bookObj) {
+                    for (let i = 1; i <= bookObj.chapters; i++) {
+                        const option = document.createElement('option');
+                        option.value = i;
+                        option.textContent = `Chapter ${i}`;
+                        chapterSelect.appendChild(option);
+                    }
+                }
+            }
+
+            chapterSelect.value = targetChapter;
+            
+            loadScripture().then(() => {
+                const verseTargetNode = document.getElementById(`verse-${targetVerseNum}`);
+                if (verseTargetNode) {
+                    verseTargetNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    verseTargetNode.style.backgroundColor = '#f0f4f1';
+                    setTimeout(() => { verseTargetNode.style.backgroundColor = 'transparent'; }, 1500);
+                }
+            });
+        }
+
+        let userReadingLogHistory = [];
+        function logReadingChapter(book, chapter, trans) {
+            const timestamp = new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+            const logEntryString = `${book} Chapter ${chapter} (${trans}) — Read at ${timestamp}`;
+            
+            userReadingLogHistory.unshift(logEntryString);
+            if (userReadingLogHistory.length > 20) userReadingLogHistory.pop();
+            
+            const logDiv = document.getElementById('readingLogList');
+            if (logDiv) {
+                logDiv.innerHTML = userReadingLogHistory.map(entry => `
+                    <div style="padding:0.6rem 0.8rem; border-radius:6px; border:1px solid var(--border); font-size:0.85rem; background:#faf8f5;">
+                        📖 ${entry}
+                    </div>
+                `).join('');
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initSelectors();
+            loadJournalEntries();
+            updateChatStatusUI();
+            loadHighlighterSystem();
+        });
+    </script>
+</body>
+
+</html>
